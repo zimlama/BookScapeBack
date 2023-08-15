@@ -1,7 +1,7 @@
 const express = require('express');
 //const getAllBooks = express.Router();
 const router = express.Router();
-const allBooks = require('../controllers/allBooks');
+const allBooks = require('../controllers/allbooks');
 const allTags = require('../controllers/allTags');
 
 const findById = require('../controllers/findById');
