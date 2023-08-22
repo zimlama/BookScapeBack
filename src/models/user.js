@@ -1,40 +1,40 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  sequelize.define("User", {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-
-    password: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    admin: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-      default: false
+  sequelize.define(
+    "User",
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
       },
-    born_date:{
-        type: DataTypes.DATE,
-        allowNull: true, 
+
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
+      password: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      admin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
     },
-    active:{
-      type: DataTypes.BOOLEAN
-      }
-  },{paranoid:true});
+    { paranoid: true }
+  );
 };

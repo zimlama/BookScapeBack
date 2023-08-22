@@ -9,67 +9,65 @@ const createBdd = async (
   aux2Author,
   books
 ) => {
-    for (let i = 0; i < auxTags.length; i++) {
-      await Tag.create({
-        name: auxTags[i],
-      });
-    }
-    for (let i = 0; i < auxLanguage.length; i++) {
-      await Language.create({
-        language: auxLanguage[i],
-      });
-    }
-    for (let i = 0; i < aux2Publisher.length; i++) {
-      await Publisher.create({
-        name: aux2Publisher[i],
-      });
-    }
-    for (let i = 0; i < aux2Author.length; i++) {
-      await Author.create({
-        name: aux2Author[i],
-      });
-    }
-    for (let i = 0; i < books.length; i++) {
-      const tagsId = await Tag.findAll({
-        attributes: ["id"],
-        where: {
-          name: books[i].tags,
-        },
-      });
-      const authorsId = await Author.findAll({
-        attributes: ["id"],
-        where: {
-          name: books[i].authors,
-        },
-      });
-      const languageId = await Language.findAll({
-        attributes: ["id"],
-        where: {
-          language: books[i].language,
-        },
-      });
-      const publisherId = await Publisher.findAll({
-        attributes: ["id"],
-        where: {
-          name: books[i].publisher,
-        },
-      });
+  for (let i = 0; i < auxTags.length; i++) {
+    await Tag.create({
+      name: auxTags[i],
+    });
+  }
+  for (let i = 0; i < auxLanguage.length; i++) {
+    await Language.create({
+      language: auxLanguage[i],
+    });
+  }
+  for (let i = 0; i < aux2Publisher.length; i++) {
+    await Publisher.create({
+      name: aux2Publisher[i],
+    });
+  }
+  for (let i = 0; i < aux2Author.length; i++) {
+    await Author.create({
+      name: aux2Author[i],
+    });
+  }
+  for (let i = 0; i < books.length; i++) {
+    const tagsId = await Tag.findAll({
+      attributes: ["id"],
+      where: {
+        name: books[i].tags,
+      },
+    });
+    const authorsId = await Author.findAll({
+      attributes: ["id"],
+      where: {
+        name: books[i].authors,
+      },
+    });
+    const languageId = await Language.findAll({
+      attributes: ["id"],
+      where: {
+        language: books[i].language,
+      },
+    });
+    const publisherId = await Publisher.findAll({
+      attributes: ["id"],
+      where: {
+        name: books[i].publisher,
+      },
+    });
 
-      const bookCreate = await Book.create(
-        {
-          isbn: books[i].isbn,
-          title: books[i].title,
-          published_date: books[i].published_date,
-          description: books[i].description,
-          image: books[i].image,
-          price: books[i].price,
-          PublisherId: publisherId[0].dataValues.id,
-          LanguageId: languageId[0].dataValues.id,
-        }
-        );
-      await bookCreate.addTag(tagsId /*[0].dataValues.id*/);
-      await bookCreate.addAuthor(authorsId);
-    }
+    const bookCreate = await Book.create({
+      isbn: books[i].isbn,
+      title: books[i].title,
+      published_date: books[i].published_date,
+      description: books[i].description,
+      image: books[i].image,
+      price: books[i].price,
+      PublisherId: publisherId[0].dataValues.id,
+      LanguageId: languageId[0].dataValues.id,
+    });
+    await bookCreate.addTag(tagsId /*[0].dataValues.id*/);
+    await bookCreate.addAuthor(authorsId);
+  }
 };
 
 const fillBdd = async () => {
@@ -100,18 +98,20 @@ const fillBdd = async () => {
       let { data } = await axios.get(
         `https://www.googleapis.com/books/v1/volumes?q=isbn:${ISBN[i]}&key:${API_KEY}`
       );
-
+      // console.log("consultando libro",ISBN[i]);
       const book = {
         isbn: ISBN[i].toString(),
         title: data.items[0].volumeInfo.title,
         authors: data.items[0].volumeInfo.authors
           ? data.items[0].volumeInfo.authors
           : ["none"],
-        published_date: data.items[0].volumeInfo.publishedDate.length === 4
+        /* data.items[0].volumeInfo.publishedDate.length=== 4
         ?
         (Number(data.items[0].volumeInfo.publishedDate))
-        :
-        (Number(data.items[0].volumeInfo.publishedDate.slice(0, -6))),
+        :*/
+        published_date: Number(
+          data.items[0].volumeInfo.publishedDate.slice(0, -6)
+        ),
         description: data.items[0].volumeInfo.description,
         publisher: data.items[0].volumeInfo.publisher
           ? data.items[0].volumeInfo.publisher
@@ -180,9 +180,9 @@ const fillBdd = async () => {
       prueba: "prueba llenar BDD",
     };
     console.log(success);
-    return(success);
-  }catch(err){
+    return success;
+  } catch (err) {
     console.log(err);
-  };
+  }
 };
 module.exports = fillBdd;
