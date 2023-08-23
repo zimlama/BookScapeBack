@@ -47,7 +47,7 @@ sequelize.models = Object.fromEntries(capsEntries);
 
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
-// console.log(sequelize.models);
+console.log(sequelize.models);
 const {
   Book,
   Review,
@@ -61,6 +61,7 @@ const {
   Publisher,
   Tag,
   Author,
+  //Rating_avg_book,
 } = sequelize.models;
 //!Revisar todas las relaciones hasMany y pasar a belongto()
 // Aca vendrian las relaciones
@@ -110,17 +111,11 @@ Pay.belongsTo(User, { foreignKey: "UserId" }); //añade una foringKey UserId a P
 
 User.hasOne(ShoppingCart, { foreignKey: "UserId" }); //añade un foringKey UserId a ShoppingCart
 ShoppingCart.belongsTo(User, { foreignKey: "UserId" }); //añade un foringKey UserId a ShoppingCart
-//de la siguiente manera se amplia la posibilidad de busqueda de los controllers para futuras necesidades
-ShoppingCart.hasOne(User, { foreignKey: "ShoppingCartId" }); //añade un foringKey ShoppingCartId a User
-User.belongsTo(ShoppingCart, { foreignKey: "ShoppingCartId" }); //añade un foringKey ShoppingCartId a User
 
 //Relaciones de Order
 Order.hasMany(Detail, { foreignKey: "OrderId" }); //añade una foringKey Order a Detail
 Detail.belongsTo(Order, { foreignKey: "UserId" }); //añade una foringKey Order a Detail
 
-Order.hasOne(Pay, { foreignKey: "OrderId" }); //añade un foringKey OrderId a Pay
-Pay.belongsTo(Order, { foreignKey: "OrderId" }); //añade un foringKey OrderId a Pay
-//de la siguiente manera se amplia la posibilidad de busqueda de los controllers para futuras necesidades
 Pay.hasOne(Order, { foreignKey: "PayId" }); //añade un foringKey PayId a Order
 Order.belongsTo(Pay, { foreignKey: "PayId" }); //añade un foringKey PayId a Order
 

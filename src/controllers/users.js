@@ -172,7 +172,7 @@ const searchUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const searchUser = await User.findByPk(id, {
-      attributes: ["id", "email", "username", "born_date"],
+      attributes: ["id", "email", "username"],
       include: [
         {
           model: ShoppingCart,

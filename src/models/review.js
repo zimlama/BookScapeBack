@@ -13,12 +13,11 @@ module.exports = (sequelize) => {
     },
     rating: {
       type: DataTypes.INTEGER,
+      validate: {
+        min: 1, // Establecer el valor mínimo para 'rating'
+        max: 5, // Establecer el valor máximo para 'rating'
+      },
       allowNull: false,
-    },
-    review_date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
     },
    /*active: {
       type: DataTypes.BOOLEAN,
