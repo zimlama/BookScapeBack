@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const allBooks = require("../controllers/allBooks");
+const allBooks = require("../controllers/allBooks"); //se hizo cambio por B mayuscula el archivo allBooks.js
 const allTags = require("../controllers/allTags");
 const filterBooks = require("../controllers/filterBooks");
 const findById = require("../controllers/findById");
