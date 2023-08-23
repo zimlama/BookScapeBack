@@ -4,7 +4,7 @@ const fillBdd = require("./src/controllers/fillBdd");
 const fillUsers = require("./src/controllers/fillUsers");
 const fillRating = require("./src/controllers/fillRatings");
 require("dotenv").config();
-const { SV_PORT } = process.env;
+const { PORT } = process.env;
 //const fillBdd = require ("./src/controllers/fillBdd")
 // Syncing all the models at once.
 async function main() {
@@ -13,13 +13,13 @@ async function main() {
     await conn.authenticate();
     console.log("Connection has been established successfully.");
     // Sincronizar el modelo de la base de datos
-    conn.sync({ /*force: true*/alter: true }).then(() => {
+    conn.sync({ /* force: true */alter: true }).then(() => {
       //fillBdd();
       //fillUsers();
       //fillRating()
       // Iniciar el servidor web en el puerto especificado
-      app.listen(SV_PORT, () => {
-        console.log(`%s listening at ${SV_PORT}`); // eslint-disable-line no-console
+      app.listen(PORT, () => {
+        console.log(`%s listening at ${PORT}`); // eslint-disable-line no-console
       });
     });
   } catch (error) {
