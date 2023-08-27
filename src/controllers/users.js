@@ -60,12 +60,14 @@ const registerUser = async (req, res, next) => {
       message: "User created succesfully!",
       id: newUser.id,
       email: newUser.email,
+      cartId: cartToAssociate.cart_id,
     });
 
     res.send({
       message: "User created succesfully!",
       id: newUser.id,
       email: newUser.email,
+      cartId: cartToAssociate.cart_id,
     });
   } catch (error) {
     next(error);
@@ -105,12 +107,23 @@ const loginUser = async (req, res, next) => {
         MY_SECRET,
         { expiresIn: "12h" }
       );
+
+      const Shoppingcart = await ShoppingCart.findOne(
+        {
+          attributes: ["cart_id"],
+          where: {
+            UserId: userCheck.id,
+          }
+        }
+      );
+
       res.send({
         token: jwtToken,
         message: "Login succesfully!",
         id: userCheck.id,
         email: userCheck.email,
         username: userCheck.username,
+        shoppingcartId: Shoppingcart
       });
     }
   } catch (error) {
@@ -159,6 +172,42 @@ const getUsers = async (req, res, next) => {
     } else {
       const users = await User.findAll({
         attributes: { exclude: ["password"] },
+        include: [
+          {
+            model: ShoppingCart,
+            attributes: ["cart_id"],
+            include:[
+              {
+                model: Book,
+                attributes: ["title","id_book"]
+              },
+            ],
+          },
+          {
+            model: Favorite,
+            include:[
+              {
+                model: Book,
+                attributes: ["title","id_book"]
+              },
+            ],
+          },
+          {
+            model: Review,
+            include:[
+              {
+                model: Book,
+                attributes: ["title","id_book"]
+              },
+            ],
+          },
+          {
+            model: Order,
+          },
+          {
+            model: Pay,
+          },
+        ],
       });
       res.send(users);
     }
@@ -217,11 +266,12 @@ const toggleUserActiveStatus = async (req, res, next) => {
     await user.save();
 
     console.log(`User active status changed to ${newActiveStatus}`);
-    res.send(`User active status changed to ${newActiveStatus}`);
+    res.send(newActiveStatus);
   } catch (error) {
     next(error);
   }
 };
+
 module.exports = {
   registerUser,
   loginUser,
