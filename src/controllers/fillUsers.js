@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { PORT } = process.env;
 
 const users = [
   {
@@ -50,7 +51,7 @@ const users = [
 const fillUsers = async () => {
   for (const user of users) {
     console.log("se intento crear user: ", user);
-    await axios.post("http://localhost:3001/users/", user);
+    await axios.post(`http://localhost:${PORT}/users/`, user);
   }
 };
 
