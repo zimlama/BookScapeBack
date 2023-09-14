@@ -9,29 +9,32 @@ module.exports = (sequelize) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      payment_method: {
+      pay_id: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      total_order: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
+      // total_order: {
+      //   type: DataTypes.DECIMAL(10, 2),
+      //   allowNull: false,
+      // },
       order_date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
       },
-      purchase_status: {
-        type: DataTypes.ENUM("Pending", "Completed"),
-        allowNull: false,
-        defaultValue: "Pending",
-      },
+      // purchase_status: {
+      //   type: DataTypes.ENUM("Pending", "Completed"),
+      //   allowNull: false,
+      //   defaultValue: "Pending",
+      // },
       // active: {
       //   type: DataTypes.BOOLEAN,
       //   allowNull: false,
       //   defaultValue: true,
       // },
+      selectBooks: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: true,
+      }
     },
     {paranoid: true }
   );

@@ -45,10 +45,11 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true, 
     },
-    rating_ave: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
+    /// EL RATING SE CALCULA AUTOMATICAMENTE EN EL CONTROLLER
+    // rating_ave: {
+    //   type: DataTypes.FLOAT,
+    //   allowNull: true,
+    // },
     image: {
       type: DataTypes.TEXT,
       allowNull: false,

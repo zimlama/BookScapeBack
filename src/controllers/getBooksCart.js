@@ -74,7 +74,6 @@ const getBooksCart = async (req, res, next) => {
             "published_date",
             "price",
             "description",
-            "rating_ave",
             "image",
           ],
           include: [

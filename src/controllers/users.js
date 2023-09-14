@@ -19,6 +19,12 @@ const jwt = require("jsonwebtoken");
 //--------------------------------------------------------
 
 //Registro de un nuevo usuario -----------------------------------------------
+
+//si el email ya esxiste en la base de datos, y te estaslogueando por google, agergar a ese ID USER los datos de
+//google, devolver message se agregaron campos de google
+//PERO si LSO DATOS DE GOGOLE YA ESTAN (SUB) se devuelve loogin existoso Y
+//SI NO tiENE NINGUN USUARIO? SE CREA USER
+
 const registerUser = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
@@ -28,7 +34,7 @@ const registerUser = async (req, res, next) => {
       where: { email: email },
     });
     if (alreadyExistsMail.length) {
-      console.log("Email already registered");
+      // console.log("Email already registered");
       res.send("Email already registered");
       return;
     }
@@ -39,7 +45,7 @@ const registerUser = async (req, res, next) => {
     });
 
     if (alreadyExistsUsername.length) {
-      console.log("Username already registered");
+      // console.log("Username already registered");
       res.send("Username already registered");
       return;
     }
@@ -56,12 +62,12 @@ const registerUser = async (req, res, next) => {
     const cartToAssociate = await ShoppingCart.create();
     await cartToAssociate.setUser(newUser);
 
-    console.log({
-      message: "User created succesfully!",
-      id: newUser.id,
-      email: newUser.email,
-      cartId: cartToAssociate.cart_id,
-    });
+    // console.log({
+    //   message: "User created succesfully!",
+    //   id: newUser.id,
+    //   email: newUser.email,
+    //   cartId: cartToAssociate.cart_id,
+    // });
 
     res.send({
       message: "User created succesfully!",
@@ -76,10 +82,169 @@ const registerUser = async (req, res, next) => {
 
 //Login de un usuario ya registrado
 // puede iniciar sesion con username o email y contraseña--------------------------------------------
+
+//crear ruta de loggin por google
+
+const logginGoogle = async (req, res, next) => {
+  try {
+    // console.log("INGRESE AL LOGGIN DE GOOGLE");
+    const credenciales = req.body;
+    // console.log("body", req.body);
+    // console.log("se obtuvieron las credenciales del body", credenciales);
+    if (credenciales) {
+      //verificar que el usuario exista como google email
+      // console.log("Si hubo credenciales se busca si ya fue registrado por google");
+      const userCheckGoogle = await User.findOne({
+        where: {
+          email: credenciales.email,
+        },
+      });
+      // console.log("userCheckGoogle",userCheckGoogle);
+      if (userCheckGoogle) {
+        // console.log("si existen los datos de google en la base previamente se busca su CART");
+        const shoppingcart = await User.findOne({
+          attributes: ["id", "email"],
+          include: {
+            model: ShoppingCart,
+            attributes: ["cart_id"],
+          },
+          where: {
+            email: credenciales.email,
+          },
+        });
+        console.log(
+          "usuario ya registrado por gogole, se busco Cart",
+          shoppingcart
+        );
+        console.log(
+          "se envia Usuario Ya registrado con googlem y los datos de usuario"
+        );
+        /* return res.status(200).json({
+          message: "Login succesfully!",
+          id: userCheckGoogle.id,
+          email: userCheckGoogle.email,
+          username: userCheckGoogle.username,
+          cartId: shoppingcart.ShoppingCart.cart_id,
+        }); */
+        // console.log("esot es return res.send:",{
+        //   message: "Login succesfully!",
+        //   id: shoppingcart.id,
+        //   email: shoppingcart.email,
+        //   username: credenciales.given_name/*shoppingcart.username ? shoppingcart.email : shoppingcart.email*/,
+        //   cartId: shoppingcart.ShoppingCart ? shoppingcart.ShoppingCart.cart_id : null,
+        // });
+        return res.send({
+          token: "ok",
+          message: "Login succesfully!",
+          id: shoppingcart.id,
+          email: shoppingcart.email,
+          admin:userCheckGoogle.admin,
+          username:
+            credenciales.given_name /*shoppingcart.username ? shoppingcart.email : shoppingcart.email*/,
+          cartId: shoppingcart.ShoppingCart
+            ? shoppingcart.ShoppingCart.cart_id
+            : null,
+        });
+      } else {
+        // console.log(
+        //   "si no existian los datos de goole verificamos si existia el mail aunque sea"
+        // );
+        //verifico que el usuario exista comparando el email con email de gooole
+        const userCheckExistingUser = await User.findOne({
+          where: {
+            email: credenciales.email,
+          },
+        });
+        if (userCheckExistingUser) {
+          // console.log(
+          //   "si existe el mail pero no los datos de google se agregan datos de google"
+          // );
+          //agrego los datos de GOOGLE al usuario
+          userCheckExistingUser.azp = credenciales.azp;
+          userCheckExistingUser.aud = credenciales.aud;
+          userCheckExistingUser.email_verified = credenciales.email_verified;
+          userCheckExistingUser.family_name = credenciales.family_name;
+          userCheckExistingUser.given_name = credenciales.given_name;
+          userCheckExistingUser.name = credenciales.name;
+          userCheckExistingUser.locale = credenciales.locale;
+          userCheckExistingUser.picture = credenciales.picture;
+          userCheckExistingUser.sub = credenciales.sub;
+
+          const shoppingCart = await User.findOne({
+            attributes: ["id", "email"],
+            include: {
+              model: ShoppingCart,
+              attributes: ["cart_id"],
+            },
+            where: {
+              email: credenciales.email,
+            },
+          });
+
+          await userCheckExistingUser.save();
+          console.log("se agregaron los datos de google");
+          return res.send({
+            token: "ok",
+            message: "Login succesfully!",
+            id: shoppingCart.id,
+            email: shoppingCart.email,
+            username:
+              credenciales.given_name /*shoppingcart.username ? shoppingcart.email : shoppingcart.email*/,
+            cartId: shoppinCart.ShoppingCart
+              ? shoppingCart.ShoppingCart.cart_id
+              : null,
+          });
+        } else {
+          // console.log(
+          //   "si no existe el mail del usuario se crea el usuario con todos los datos de google y usernane = email y name = name de google"
+          // );
+          //si no existe usuario email, crearlo por completo
+          const newUser = await User.create({
+            azp: credenciales.azp,
+            aud: credenciales.aud,
+            email_verified: credenciales.email_verified,
+            family_name: credenciales.family_name,
+            given_name: credenciales.given_name,
+            name: credenciales.name,
+            locale: credenciales.locale,
+            picture: credenciales.picture,
+            sub: credenciales.sub,
+            email: credenciales.email,
+            username: credenciales.email,
+          });
+          const cartToAssociate = await ShoppingCart.create();
+          // console.log("se crea su carrito");
+          await cartToAssociate.setUser(newUser);
+          // console.log("se asocia su carrito");
+
+          // console.log({
+          //   message: "User created succesfully!",
+          //   id: newUser.id,
+          //   email: newUser.email,
+          //   cartId: cartToAssociate.cart_id,
+          // });
+          // console.log("se envia mensaje de usaurio creado succesfully");
+          return res.send({
+            token: "ok",
+            message: "Login succesfully!",
+            id: newUser.id,
+            email: newUser.email,
+            cartId: cartToAssociate.cart_id,
+            username: credenciales.given_name,
+          });
+        }
+      }
+    } else {
+      return res.send({ message: "La api no resibió las credenciales" });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 const loginUser = async (req, res, next) => {
   try {
     const { username, password } = req.body;
-
     const userCheck = await User.findOne({
       where: {
         [Op.or]: [{ username: username }, { email: username }],
@@ -108,22 +273,21 @@ const loginUser = async (req, res, next) => {
         { expiresIn: "12h" }
       );
 
-      const Shoppingcart = await ShoppingCart.findOne(
-        {
-          attributes: ["cart_id"],
-          where: {
-            UserId: userCheck.id,
-          }
-        }
-      );
+      const Shoppingcart = await ShoppingCart.findOne({
+        attributes: ["cart_id"],
+        where: {
+          UserId: userCheck.id,
+        },
+      });
 
       res.send({
         token: jwtToken,
         message: "Login succesfully!",
         id: userCheck.id,
         email: userCheck.email,
+        admin:userCheck.admin,
         username: userCheck.username,
-        shoppingcartId: Shoppingcart
+        shoppingcartId: Shoppingcart,
       });
     }
   } catch (error) {
@@ -176,28 +340,28 @@ const getUsers = async (req, res, next) => {
           {
             model: ShoppingCart,
             attributes: ["cart_id"],
-            include:[
+            include: [
               {
                 model: Book,
-                attributes: ["title","id_book"]
+                attributes: ["title", "id_book"],
               },
             ],
           },
           {
             model: Favorite,
-            include:[
+            include: [
               {
                 model: Book,
-                attributes: ["title","id_book"]
+                attributes: ["title", "id_book"],
               },
             ],
           },
           {
             model: Review,
-            include:[
+            include: [
               {
                 model: Book,
-                attributes: ["title","id_book"]
+                attributes: ["title", "id_book"],
               },
             ],
           },
@@ -241,7 +405,7 @@ const searchUserById = async (req, res, next) => {
       ],
     });
     if (searchUser) res.send(searchUser);
-    else res.send({ message: "ID User has not been found" });
+    else res.status(404).json({ message: "ID User has not been found" });
   } catch (error) {
     next(error);
   }
@@ -256,7 +420,7 @@ const toggleUserActiveStatus = async (req, res, next) => {
 
     if (!user) {
       console.log("User not found");
-      res.send("User not found");
+      res.status(404).json("User not found");
       return;
     }
 
@@ -272,10 +436,121 @@ const toggleUserActiveStatus = async (req, res, next) => {
   }
 };
 
+const updateUser = async (req, res, next) => {
+  try {
+    // console.log(id, "id");
+    const { id, username, email, password, newPassword } = req.body;
+    console.log(id, username, email, password, newPassword, "datos enviados");
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.send({ message: "Usuario no encontrado" });
+    }
+
+    // Verificar si el nuevo email ya está registrado por otro usuario
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({
+        where: { email: email },
+      });
+
+      if (emailExists) {
+        return res.send({ message: "Email ya está registrado" });
+      }
+    }
+
+    // Actualizar campos de perfil
+    user.username = username || user.username;
+    user.email = email || user.email;
+
+    if (newPassword) {
+      // Encriptar la nueva contraseña
+      const saltRounds = 10;
+      const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+      user.password = hashedNewPassword;
+    }
+
+    await user.save();
+
+    // Obtener los datos actualizados del usuario (excluyendo la contraseña)
+    const updatedUser = await User.findOne({
+      where: { id: user.id },
+      attributes: ["id", "email", "username"],
+    });
+    return res.send({
+      message: "Información de usuario actualizada",
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    await user.destroy();
+
+    return res.status(200).json({ message: "Usuario eliminado exitosamente" });
+  } catch (error) {
+    next(error);
+  }
+};
+const getDeletedUsers = async (req, res, next) => {
+  try {
+    // Consulta todos los usuarios eliminados lógicamente
+    const deletedUsers = await User.findAll({
+      paranoid: false, // Incluye registros eliminados lógicamente
+      where: { deletedAt: { [Op.ne]: null } }, // Filtra registros con deletedAt no nulo
+    });
+
+    if (deletedUsers.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No se encontraron usuarios eliminados" });
+    }
+
+    return res.status(200).json(deletedUsers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const restoreUser = async (req, res, next) => {
+  try {
+    const { id } = req.params; // Obtener el ID del usuario a restaurar desde los parámetros de la URL
+
+    // Restaurar al usuario desactivando la eliminación lógica
+    const restoredUser = await User.restore({
+      where: { id: id },
+    });
+
+    if (!restoredUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    return res.status(200).json({ message: "Usuario restaurado exitosamente" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   searchUserById,
   getUsers,
   toggleUserActiveStatus,
+  updateUser,
+  deleteUser,
+  getDeletedUsers,
+  restoreUser,
+  logginGoogle,
 };

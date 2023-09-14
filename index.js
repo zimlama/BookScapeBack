@@ -2,7 +2,7 @@ const app = require("./src/app");
 const { conn } = require("./src/db.js");
 const fillBdd = require("./src/controllers/fillBdd");
 const fillUsers = require("./src/controllers/fillUsers");
-const fillRating = require("./src/controllers/fillRatings");
+//const fillRating = require("./src/controllers/fillRatings");
 require("dotenv").config();
 const { PORT } = process.env;
 //const fillBdd = require ("./src/controllers/fillBdd")
@@ -13,10 +13,10 @@ async function main() {
     await conn.authenticate();
     console.log("Connection has been established successfully.");
     // Sincronizar el modelo de la base de datos
-    conn.sync({ /* force: true */alter: true }).then(() => {
-      //fillBdd();
-      //fillUsers();
-      //fillRating()
+    conn.sync({ /* force: true */alter: true}).then(() => {
+      //  fillBdd();
+      //  fillUsers();
+      // fillRating()//NO SE USA MAS - SE CARGAN LOS RATINGS AL CREAR UNA REVIEW
       // Iniciar el servidor web en el puerto especificado
       app.listen(PORT, () => {
         console.log(`%s listening at ${PORT}`); // eslint-disable-line no-console
