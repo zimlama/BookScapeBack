@@ -1,6 +1,5 @@
 const axios = require("axios");
 const { PORT } = process.env;
-
 const users = [
   {
     username: "ejemplo1",
